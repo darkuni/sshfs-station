@@ -46,6 +46,33 @@ func TestNewDeviceDefaultsAndLetters(t *testing.T) {
 	}
 }
 
+func TestSteamFrameUser(t *testing.T) {
+	d := NewDevice("f", ModelSteamFrame, nil)
+	if d.Username != "steamos" {
+		t.Fatalf("Steam Frame should default to steamos, got %q", d.Username)
+	}
+	d.Host, d.SDCard = "frame", "card"
+	if got, _ := RemotePath(d, Drive{"Y", LocSD, ""}); got != "/run/media/steamos/card" {
+		t.Errorf("SD path should follow the user: %s", got)
+	}
+	if iss := Validate(d, nil, true); HasErrors(iss) || find(iss, "username", -1, Warn) != nil {
+		t.Errorf("steamos on a Frame is fine: %+v", iss)
+	}
+	d.Username = "deck"
+	if w := find(Validate(d, nil, true), "username", -1, Warn); w == nil || !strings.Contains(w.Message, "steamos") {
+		t.Error("deck on a Steam Frame should warn")
+	}
+	d.Username = ""
+	if e := find(Validate(d, nil, true), "username", -1, Error); e == nil || !strings.Contains(e.Message, "steamos is the default") {
+		t.Error("empty username error should name the Frame's default")
+	}
+	dk := NewDevice("d", ModelDeckOLED, nil)
+	dk.Host = "steamdeck"
+	if find(Validate(dk, nil, true), "username", -1, Warn) != nil {
+		t.Error("deck on a Steam Deck must not warn")
+	}
+}
+
 func TestAllModelsHaveDefaults(t *testing.T) {
 	for _, id := range []Model{ModelDeckLCD, ModelDeckOLED, ModelSteamMachine, ModelSteamFrame} {
 		info, ok := ModelByID(id)

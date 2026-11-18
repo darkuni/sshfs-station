@@ -32,10 +32,19 @@ func Models() []ModelInfo {
 			"steamdeck is the default name. If you own more than one Deck, give each a different hostname or use its IP address."},
 		{ModelSteamMachine, "Steam Machine", "", "deck",
 			"Use the hostname or IP address of the Steam Machine (check your router's device list)."},
-		{ModelSteamFrame, "Steam Frame", "", "deck",
+		{ModelSteamFrame, "Steam Frame", "", "steamos",
 			"Use the hostname or IP address of the Steam Frame (check your router's device list)."},
 		{ModelOther, "Other SSH device", "", "", "Hostname or IP address of the device."},
 	}
+}
+
+// DefaultUser is the username a model ships with ("deck" on a Steam Deck,
+// "steamos" on a Steam Frame), or "deck" when the model has none.
+func DefaultUser(m Model) string {
+	if info, ok := ModelByID(m); ok && info.DefaultUser != "" {
+		return info.DefaultUser
+	}
+	return "deck"
 }
 
 // ModelByID returns the info for a model, and false if it is unknown.

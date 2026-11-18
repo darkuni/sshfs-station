@@ -68,10 +68,14 @@ func Validate(d Device, others []Device, havePassword bool) []Issue {
 		add("port", -1, Error, "The SSH port must be between 1 and 65535 (leave it blank for 22).")
 	}
 
+	defUser := DefaultUser(d.Model)
 	if trim(d.Username) == "" {
-		add("username", -1, Error, "You must enter your username. deck is the default.")
+		add("username", -1, Error, "You must enter your username. "+defUser+" is the default on this device.")
 	} else if !allChars(trim(d.Username), func(r rune) bool { return isHostChar(r) || r == '$' }) {
 		add("username", -1, Error, "The username can only contain letters, numbers, dots, dashes and underscores.")
+	} else if trim(d.Username) == "deck" && defUser != "deck" {
+		info, _ := ModelByID(d.Model)
+		add("username", -1, Warn, "The default username on a "+info.Label+" is "+defUser+", not deck. Change it unless you set up a deck user yourself.")
 	}
 
 	if !havePassword {
@@ -79,7 +83,7 @@ func Validate(d Device, others []Device, havePassword bool) []Issue {
 	}
 
 	if !d.NoSD && trim(d.SDCard) != "" && (hasBadChars(d.SDCard) || strings.ContainsAny(d.SDCard, `/\`)) {
-		add("sdCard", -1, Error, "The SD card name cannot contain slashes or characters Windows cannot use. Use only the folder name under run/media/"+orDefault(trim(d.Username), "deck")+".")
+		add("sdCard", -1, Error, "The SD card name cannot contain slashes or characters Windows cannot use. Use only the folder name under run/media/"+orDefault(trim(d.Username), defUser)+".")
 	}
 
 	if len(d.Drives) == 0 {

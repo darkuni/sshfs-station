@@ -37,6 +37,8 @@ sudo systemctl enable --now sshd     # turn on SSH
 hostname                             # the name to use (or: ip -4 addr for the IP)
 ```
 
+The default username is `deck` on a Steam Deck and `steamos` on a Steam Frame. New profiles start with the right one.
+
 Then add the device in SSHFS Station and press **Test connection**.
 
 If you own more than one Deck, give each its own hostname (in Konsole: `sudo hostnamectl set-hostname deck-two`) or use their IP addresses. Otherwise they all answer to `steamdeck`.

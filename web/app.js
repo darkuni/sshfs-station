@@ -402,11 +402,19 @@ function renderDevice(view) {
 
   const modelSel = h("select", { class: "select", id: "f-model" },
     state.info.models.map(m => h("option", { value: m.id, selected: m.id === d.model }, m.label)));
-  modelSel.addEventListener("change", () => {
+  modelSel.addEventListener("change", async () => {
+    const oldUser = modelInfo(state.draft.model).defaultUser || "deck";
     state.draft.model = modelSel.value;
-    $("#dev-icon").replaceChildren(modelIcon(modelSel.value));
-    $("#dev-model").textContent = modelInfo(modelSel.value).label;
+    // Still on the old hardware's default user? Switch to the new one (deck -> steamos for a Steam Frame).
+    const cur = (state.draft.username || "").trim();
+    const newUser = modelInfo(modelSel.value).defaultUser;
+    if (newUser && (cur === "" || cur === oldUser) && cur !== newUser) {
+      state.draft.username = newUser;
+      toast("Username changed to " + newUser + ", the default on a " + modelInfo(modelSel.value).label + ".", "ok");
+    }
     scheduleSave();
+    await flushSave();
+    renderDevice($("#view")); // tips and placeholders depend on the hardware
   });
 
   const hostInput = h("input", { class: "input", id: "f-host", value: d.host, autocomplete: "off", spellcheck: "false", placeholder: mi.defaultHost || "e.g. 192.168.1.50" });
@@ -415,7 +423,8 @@ function renderDevice(view) {
   const portInput = h("input", { class: "input", id: "f-port", type: "number", min: "1", max: "65535", value: d.port ? String(d.port) : "", placeholder: "22" });
   bindText(portInput, "port", { number: true, after: updateDriveUNCs });
 
-  const userInput = h("input", { class: "input", id: "f-username", value: d.username, autocomplete: "off", spellcheck: "false", placeholder: "deck" });
+  const defUser = mi.defaultUser || "deck";
+  const userInput = h("input", { class: "input", id: "f-username", value: d.username, autocomplete: "off", spellcheck: "false", placeholder: defUser });
   bindText(userInput, "username", { after: updateDriveUNCs });
 
   // A text box drawn with dots instead of type="password": browsers' password
@@ -487,7 +496,7 @@ function renderDevice(view) {
         field("port", ["SSH port"], portInput)),
       h("div", { class: "grid2" },
         field("username", ["Username", h("span", { class: "req" }, "*"),
-          tip("? How to find", "`deck` is the default, so use that unless you know you have changed it. In Konsole, `whoami` shows it.")], userInput),
+          tip("? How to find", "`" + defUser + "` is the default on a " + mi.label + ", so use that unless you know you have changed it. In Konsole, `whoami` shows it.")], userInput),
         field("password", ["SUDO password", h("span", { class: "req" }, "*"),
           tip("? How to get one", "You must set a password on the device first. In Desktop Mode open Konsole and type `passwd`. SSH must be on too: `sudo systemctl enable --now sshd`."),
           tip("Is this safe?", safeText, "safe")],
