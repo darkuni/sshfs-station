@@ -1,0 +1,72 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check formatting
+        if: runner.os == 'Linux'
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+      - run: go vet ./...
+      - name: Test (race detector on Linux)
+        if: runner.os == 'Linux'
+        run: go test -race ./...
+      - name: Test
+        if: runner.os == 'Windows'
+        run: go test ./...
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Version
+        id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v="$GITHUB_REF_NAME"; else v="dev-${GITHUB_SHA::7}"; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Build Windows x64
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist/pkg
+          flags="-s -w -X main.version=${{ steps.v.outputs.version }}"
+          go build -trimpath -ldflags "$flags -H windowsgui" -o dist/pkg/sshfs-station.exe .
+          go build -trimpath -ldflags "$flags" -o dist/pkg/sshfs-station-cli.exe .
+          cp README.md LICENSE dist/pkg/
+          cd dist/pkg && zip -9 "../sshfs-station-${{ steps.v.outputs.version }}-windows-x64.zip" *
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sshfs-station-${{ steps.v.outputs.version }}-windows-x64
+          path: dist/pkg/*
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --title "sshfs-station $GITHUB_REF_NAME" --generate-notes --verify-tag

@@ -1,0 +1,5 @@
+/dist/
+/sshfs-station
+/sshfs-station.exe
+*.test
+.DS_Store

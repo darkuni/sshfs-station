@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="sm-token" content="{{TOKEN}}">
+<title>SSHFS Station</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a9fff'/%3E%3Cpath d='M18 22h28v20H18z' fill='none' stroke='white' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='5' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div class="brand-name">SSHFS Station</div>
+        <div class="brand-sub" id="brand-sub">Steam drives in Windows</div>
+      </div>
+    </div>
+
+    <div class="side-head">
+      <span>Devices</span>
+      <button class="btn btn-small" id="add-device">+ Add</button>
+    </div>
+    <nav class="device-list" id="device-list" aria-label="Devices"></nav>
+
+    <div class="side-foot">
+      <button class="side-link" id="nav-setup"><span class="dot" id="setup-dot"></span>Setup and tester</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="banner" id="modules-banner" hidden>
+      <span>WinFsp and SSHFS-Win must be installed before drives can be mounted.</span>
+      <button class="btn btn-small btn-primary" id="banner-setup">Go to Setup</button>
+    </div>
+    <div class="banner banner-demo" id="demo-banner" hidden>
+      Demo mode: drives are simulated and nothing is really mounted.
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="modal-back" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title"></h2>
+      <button class="icon-btn" id="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/assets/app.js"></script>
+</body>
+</html>
