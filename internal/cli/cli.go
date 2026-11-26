@@ -26,7 +26,7 @@ const (
 )
 
 // Commands are the words that are never treated as a profile name.
-var Commands = []string{"mount", "unmount", "status", "list", "test", "export", "check", "setup", "update", "help", "version"}
+var Commands = []string{"mount", "unmount", "status", "list", "test", "export", "check", "setup", "update", "flushdns", "help", "version"}
 
 // IsCommand reports whether arg is a CLI command or help flag.
 func IsCommand(arg string) bool {
@@ -62,6 +62,7 @@ Usage:
   sshfs-station check                    check WinFsp and SSHFS-Win and their versions
   sshfs-station setup                    download and install whatever is missing
   sshfs-station update                   update WinFsp and SSHFS-Win to the latest releases
+  sshfs-station flushdns                 clear Windows' DNS cache (after a device's IP address changes)
   sshfs-station help | version
 
 Options for any command:
@@ -179,6 +180,13 @@ func (r *Runner) Run(ctx context.Context, args []string) int {
 		return r.check(ctx)
 	case "setup":
 		return r.install(ctx, false)
+	case "flushdns":
+		if err := r.Svc.Sys.FlushDNS(ctx); err != nil {
+			return r.fail(err)
+		}
+		r.printf("Flushed the DNS cache. Windows will look device names up again.\n")
+		r.notify(Title, "Flushed the DNS cache.", false)
+		return OK
 	case "update":
 		return r.install(ctx, true)
 	}

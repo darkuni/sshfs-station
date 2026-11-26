@@ -833,6 +833,9 @@ function updateIssues() {
     if (show && show.message.includes("systemctl enable --now sshd")) {
       msg.append(" ", h("button", { class: "btn btn-small", onclick: e => doTest(e.currentTarget) }, "Test connection"));
     }
+    if (show && show.message.includes("use Flush DNS")) {
+      msg.append(" ", h("button", { class: "btn btn-small", onclick: e => flushDNS(e.currentTarget) }, "Flush DNS"));
+    }
   });
 }
 
@@ -917,6 +920,21 @@ function toggleDrive(i, btn) {
   else doMount(btn, [dr.letter]);
 }
 
+// Clears Windows' cache of names and addresses (ipconfig /flushdns).
+async function flushDNS(btn) {
+  busy(btn, true);
+  try {
+    await api("POST", "/api/dns/flush");
+    toast("DNS cache flushed. Windows will look device names up again.", "ok");
+    return true;
+  } catch (e) {
+    toast(e.message, "bad");
+    return false;
+  } finally {
+    busy(btn, false);
+  }
+}
+
 async function doTest(btn) {
   await flushSave();
   if (!(state.draft.host || "").trim()) {
@@ -935,7 +953,10 @@ async function doTest(btn) {
         h("span", { class: "mark " + (s.ok ? "ok" : "bad") }, s.ok ? "✓" : "✗"),
         h("span", {}, s.name),
         h("span", { class: "step-detail" }, s.detail))))),
-      [h("button", { class: "btn btn-primary", onclick: closeModal }, "Close")]);
+      [ok ? null : h("button", { class: "btn", onclick: async (e) => {
+          if (await flushDNS(e.currentTarget)) { closeModal(); doTest(btn); }
+        } }, "Flush DNS and test again"),
+        h("button", { class: "btn btn-primary", onclick: closeModal }, "Close")].filter(Boolean));
   } catch (e) {
     handleActionError(e);
   } finally {
@@ -1115,7 +1136,10 @@ async function renderSetup(view) {
 
     h("section", { class: "card" },
       h("div", { class: "card-title" }, "Tester"),
-      testList),
+      testList,
+      h("div", { class: "actions", style: "margin:16px 0 0" },
+        h("button", { class: "btn", onclick: e => flushDNS(e.currentTarget) }, "Flush DNS")),
+      h("div", { class: "hint" }, "Changed a device's IP address, or Windows keeps reaching the old one? Flush DNS makes Windows look the names up again. Same as running ipconfig /flushdns.")),
 
     h("section", { class: "card" },
       h("div", { class: "card-title" }, "Prepare your device"),

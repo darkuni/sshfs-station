@@ -98,6 +98,9 @@ func (s *Server) Handler() http.Handler {
 	api("GET /api/status", s.status)
 	api("GET /api/modules", s.modules)
 	api("POST /api/modules/selftest", s.selftest)
+	api("POST /api/dns/flush", func(w http.ResponseWriter, r *http.Request) (any, error) {
+		return nil, s.Svc.Sys.FlushDNS(r.Context())
+	})
 	api("POST /api/modules/install", s.startInstall)
 	api("GET /api/modules/install", s.installState)
 	// sendBeacon cannot set headers, so the goodbye carries the token in the query.

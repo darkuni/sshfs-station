@@ -60,6 +60,9 @@ type System interface {
 	Mappings(ctx context.Context) (Mappings, error)
 	// SelfTest checks that the installed components are present and usable.
 	SelfTest(ctx context.Context) []Step
+	// FlushDNS clears Windows' cache of device names and addresses
+	// (ipconfig /flushdns), for when a device's IP address has changed.
+	FlushDNS(ctx context.Context) error
 	// Shortcut creates (or removes) a Windows shortcut to this program.
 	Shortcut(ctx context.Context, sc Shortcut) (string, error)
 	// Demo is true when the system is simulated (not Windows, or --demo).

@@ -28,6 +28,10 @@ func errorCode(output string) string {
 const SSHDHint = "Windows was denied access (error 5). This usually means SSH is not running on the device. " +
 	"On the device, switch to Desktop Mode, open Konsole and run: sudo systemctl enable --now sshd. Then try Test connection."
 
+// FlushDNSHint is shown when Windows cannot find the device (errors 53 and 67).
+const FlushDNSHint = "Windows could not find the device or SSHFS-Win. Check that the device is on, the name or IP is right, and that WinFsp and SSHFS-Win are installed (see the Setup tab). " +
+	"If the device's IP address changed, use Flush DNS and try again."
+
 // FriendlyNetUseError turns the output of a failed `net use` into advice a
 // person can act on. The numeric Windows error code survives localisation, so
 // the code is matched rather than the wording.
@@ -38,7 +42,7 @@ func FriendlyNetUseError(output string) string {
 		case "5":
 			return SSHDHint
 		case "53", "67":
-			return "Windows could not find the device or SSHFS-Win. Check that the device is on, the name or IP is right, and that WinFsp and SSHFS-Win are installed (see the Setup tab)."
+			return FlushDNSHint
 		case "86", "1326":
 			return "The device refused the username or password. Check the SUDO password and the username."
 		case "85":

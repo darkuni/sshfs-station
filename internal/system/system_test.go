@@ -250,6 +250,9 @@ func TestFriendlyNetUseError(t *testing.T) {
 			t.Errorf("FriendlyNetUseError(%q) = %q, want it to contain %q", in, got, want)
 		}
 	}
+	if got := FriendlyNetUseError("System error 67 has occurred."); !strings.Contains(got, "use Flush DNS") {
+		t.Errorf("error 67 should suggest Flush DNS: %q", got)
+	}
 	if got := FriendlyNetUseError("something odd"); got != "something odd" {
 		t.Errorf("unknown output should pass through, got %q", got)
 	}

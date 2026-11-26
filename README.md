@@ -60,6 +60,7 @@ sshfs-station export "<profile>" [--out file.bat]
 sshfs-station check                    check WinFsp and SSHFS-Win and their versions
 sshfs-station setup                    download and install whatever is missing
 sshfs-station update                   update WinFsp and SSHFS-Win to the latest releases
+sshfs-station flushdns                 clear Windows' DNS cache (after a device's IP address changes)
 sshfs-station help | version
 ```
 
@@ -99,7 +100,7 @@ Options for any command:
 | Message | What to do |
 | --- | --- |
 | Windows was denied access (error 5) | SSH is usually not running on the device. In Desktop Mode open Konsole and run `sudo systemctl enable --now sshd`, then press **Test connection**. |
-| Windows could not find the device or SSHFS-Win (error 53 or 67) | Check the device is on and the name or IP is right. Run **Setup and tester**. Restart Windows if you just installed WinFsp. |
+| Windows could not find the device or SSHFS-Win (error 53 or 67) | Check the device is on and the name or IP is right. If its IP address changed, press **Flush DNS** (or run `sshfs-station flushdns`). Run **Setup and tester**. Restart Windows if you just installed WinFsp. |
 | The device refused the username or password (error 86 or 1326) | Check the password and username (`deck` by default). |
 | Windows already has a connection to this device with different credentials (error 1219) | Unmount that device's other drives, then mount again. |
 | Drive letter is already in use (error 85) | Pick another letter. Letters used elsewhere are marked in the list. |

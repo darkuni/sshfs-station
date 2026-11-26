@@ -160,6 +160,13 @@ func (f *Fake) Unmount(ctx context.Context, letter string) error {
 	return nil
 }
 
+func (f *Fake) FlushDNS(ctx context.Context) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.Calls = append(f.Calls, "flushdns")
+	return nil
+}
+
 func (f *Fake) SelfTest(ctx context.Context) []Step {
 	f.mu.Lock()
 	defer f.mu.Unlock()

@@ -268,3 +268,13 @@ func TestModulesLatestAndUpdate(t *testing.T) {
 		t.Errorf("after update: %+v", ms)
 	}
 }
+
+func TestFlushDNSEndpoint(t *testing.T) {
+	e := newEnv(t)
+	if c := e.call("POST", "/api/dns/flush", nil, nil); c != 200 {
+		t.Fatalf("flush: %d", c)
+	}
+	if e.fake.Calls[len(e.fake.Calls)-1] != "flushdns" {
+		t.Errorf("not called: %v", e.fake.Calls)
+	}
+}

@@ -236,3 +236,16 @@ func TestCheckShowsVersionsAndUpdate(t *testing.T) {
 		t.Errorf("offline check should say so:\n%s", h.out)
 	}
 }
+
+func TestFlushDNS(t *testing.T) {
+	h := setup(t)
+	if code := h.run("flushdns"); code != OK || !strings.Contains(h.out.String(), "Flushed the DNS cache") {
+		t.Fatalf("flushdns: %d %s", code, h.out)
+	}
+	if h.fake.Calls[len(h.fake.Calls)-1] != "flushdns" {
+		t.Errorf("system flush not called: %v", h.fake.Calls)
+	}
+	if !IsCommand("flushdns") {
+		t.Error("flushdns must not be treated as a profile name")
+	}
+}

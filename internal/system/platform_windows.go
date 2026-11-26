@@ -262,6 +262,16 @@ func (w *Windows) Mappings(ctx context.Context) (Mappings, error) {
 	return ParsePSDrives(b.String()), nil
 }
 
+func (w *Windows) FlushDNS(ctx context.Context) error {
+	cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	out, err := run(cctx, nil, "ipconfig.exe", "/flushdns")
+	if err != nil {
+		return fmt.Errorf("Windows could not flush the DNS cache: %s", strings.TrimSpace(out))
+	}
+	return nil
+}
+
 func (w *Windows) SelfTest(ctx context.Context) []Step {
 	wf, ss := DetectModules(roots())
 	steps := []Step{
